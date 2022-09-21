@@ -31,11 +31,39 @@ void SoftmaxCompute::Run() {
     xdims.push_back(param.x->dims().data()[i]);
   }
   int axis = param.axis < 0 ? param.axis + xdims.size() : param.axis;
+
+  // size_t input_copy_size = param.x->data_size();
+  // std::vector<float> input_copy_cpu(input_copy_size);
+  // TargetWrapperXPU::MemcpySync(
+  //   input_copy_cpu.data(), param.x->data<float>(), input_copy_size * sizeof(float), IoDirection::DtoH);
+  
+  // for (size_t x=0; x < input_copy_size; x += 100) {
+  //   std::cout << x << " " << input_copy_cpu[x] << std::endl;
+  // }
+
   int r = xdnn::softmax(ctx.GetRawContext(),
                         param.x->data<float>(),
                         param.output->mutable_data<float>(TARGET(kXPU)),
                         xdims,
                         axis);
+
+  // size_t output_copy_size = param.output->data_size();
+  // if (output_copy_size > 200000 ) {
+  //   std::cout << "softmax output =======" << std::endl;
+  //   // std::cout << "zsoftmax size = " << std::dec << output_copy_size << std::endl;
+  //   // size_t output_copy_size = param.output->data_size();
+  //   std::vector<float> output_copy_cpu(output_copy_size);
+  //   TargetWrapperXPU::MemcpySync(
+  //     output_copy_cpu.data(), param.output->template mutable_data<float>(), output_copy_size * sizeof(float), IoDirection::DtoH);
+  //   std::cout << "zsoft ";
+  //   for (size_t x=0; x < output_copy_size; x += 1000) {
+  //     std::cout << output_copy_cpu[x] << " ";
+  //     if (x == 9000) 
+  //       break;
+  //   }
+  //   std::cout << std::endl;
+  // }
+  
   CHECK_EQ(r, 0);
 }
 

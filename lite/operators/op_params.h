@@ -1779,6 +1779,7 @@ struct XPUFcParam : ParamBase {
   bool transpose_w{true};
   bool enable_int8{false};
   bool per_channel{false};
+  float alpha{1.0f};
 };
 
 struct XPUResNetCbamParam : ParamBase {
@@ -2274,6 +2275,26 @@ struct RollParam : ParamBase {
   lite::Tensor* Out{};
   std::vector<int64_t> shifts{};
   std::vector<int64_t> axis{};
+};
+
+struct XPUQkvAttentionParam : ParamBase {
+  const lite::Tensor* input{nullptr};
+  const lite::Tensor* mask{nullptr};
+  //const lite::Tensor* SeqLod{nullptr};
+  //const lite::Tensor* PadSeqLen{nullptr};
+  lite::Tensor* output{nullptr};
+
+  // std::vector<int> slice_axes{};
+  // std::vector<int> slice_starts{};
+  // std::vector<int> slice_ends{};
+  // std::vector<int> slice_decrease_axis{};
+  //int PadSeqLen{0};
+  int head_num{};
+  int size_per_head{};
+  std::string precision{};
+  bool enable_qkv_fusion{false};
+  //bool adaptive_seqlen{false};
+  std::string act_type{};
 };
 
 }  // namespace operators

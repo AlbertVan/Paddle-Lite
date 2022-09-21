@@ -1,4 +1,4 @@
-// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+// Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <memory>
 #include "lite/core/kernel.h"
 
 namespace paddle {
@@ -22,20 +23,18 @@ namespace kernels {
 namespace xpu {
 
 template <typename T, PrecisionType PType>
-class XPUSqueezeExcitationCompute
-    : public KernelLite<TARGET(kXPU), PType> {
+class SequenceExpandCompute : public KernelLite<TARGET(kXPU), PType> {
  public:
-  using param_t = operators::XPUBlockFuseParam;
-
-  virtual void Run();
+  using param_t = operators::SequenceExpandParam;
 
   void PrepareForRun() override;
 
-  virtual ~XPUSqueezeExcitationCompute() = default;
+  void Run() override;
 
  private:
-  XPUQuantData quant_weight1_;
-  XPUQuantData quant_weight2_;
+  std::unique_ptr<int[]> lodx_cpu;
+  std::unique_ptr<int[]> lody_cpu;
+  std::unique_ptr<int[]> lodref_cpu;
 };
 
 }  // namespace xpu

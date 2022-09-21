@@ -22,20 +22,12 @@ namespace kernels {
 namespace xpu {
 
 template <typename T, PrecisionType PType>
-class XPUSqueezeExcitationCompute
-    : public KernelLite<TARGET(kXPU), PType> {
+class ExpandCompute
+    : public KernelLite<TARGET(kXPU), PType, DATALAYOUT(kAny)> {
  public:
-  using param_t = operators::XPUBlockFuseParam;
-
   virtual void Run();
 
-  void PrepareForRun() override;
-
-  virtual ~XPUSqueezeExcitationCompute() = default;
-
- private:
-  XPUQuantData quant_weight1_;
-  XPUQuantData quant_weight2_;
+  virtual ~ExpandCompute() = default;
 };
 
 }  // namespace xpu

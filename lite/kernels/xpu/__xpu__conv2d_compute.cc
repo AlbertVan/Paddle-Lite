@@ -16,6 +16,7 @@
 #include "lite/backends/xpu/math.h"
 #include "lite/backends/xpu/xpu_header_sitter.h"
 #include "lite/core/op_registry.h"
+// #include <fstream>
 
 namespace paddle {
 namespace lite {
@@ -35,6 +36,13 @@ void XPUConv2dCompute<TGEMM, TW, DX, DY, PType>::PrepareForRun() {
   auto filter_ptr = param.filter->template data<float>();
   auto filter_dims = param.filter->dims();
 
+  // std::cout << "init filter" << std::endl;
+  // for (size_t x=0; x < 10; x ++) {
+  //   std::cout << x << " " << filter_ptr[x] << std::endl;
+  //   if (x > 10) {
+  //     break;
+  //   }
+  // }
   xpu_quant_filter_ =
       TargetWrapperXPU::ConvertCPUWeightToXPUQuantWeight<float, TW>(
           filter_ptr, filter_dims, false, max_ptr_size);
@@ -129,6 +137,89 @@ void XPUConv2dCompute<TGEMM, TW, DX, DY, PType>::Run() {
         yshape);
     CHECK_EQ(r, 0);
   } else {
+    /************
+    static int mode_idx = 0;
+    if(img_c == 3 && (img_h == 1184 || img_w == 1184)) { // || img_c == 64) {
+      
+      // std::cout << "model_idx == " << mode_idx << std::endl;
+      //   if (img_c == 3)
+      //       std::cout << "conv2d first with" << std::endl;
+        size_t input_copy_size = param.input->data_size();
+        std::vector<float> input_copy_cpu(input_copy_size);
+        TargetWrapperXPU::MemcpySync(
+          input_copy_cpu.data(), param.input->template data<float>(), input_copy_size * sizeof(float), IoDirection::DtoH);
+  
+        const int32_t *ptr = reinterpret_cast<const int32_t*>(input_copy_cpu.data());
+        
+        std::cout << "zconv0 ";
+        for (size_t x=0; x < input_copy_size; x += 1000) {
+          // std::cout << x << " 0x" << std::hex << ptr[x] << std::endl;
+          std::cout << input_copy_cpu[x] << " " << std::hex << ptr[x] << " ";
+          if (x > 9000) { 
+            break;
+          }
+        }
+        std::cout << std::endl;
+        // if (mode_idx == 0x2b || mode_idx == 0x6f) {
+        //   std::ofstream ofs("input" + std::to_string(mode_idx));
+        //   for (size_t x=0; x < input_copy_size; x++) {
+        //     // std::cout << x << " " << input_copy_cpu[x] << std::endl;
+        //     ofs << std::hex << ptr[x] << std::endl;
+        //   }
+        //   ofs.close();
+        // }
+
+        // int max_ptr_size = XPUMemory::get_max_ptr_size();
+        // std::cout << "quant addr " << std::hex << xpu_quant_filter_.data_ptr_ << std::endl;
+        // std::vector<float> max_vec(max_ptr_size);
+        // TargetWrapperXPU::MemcpySync(
+        //   max_vec.data(), xpu_quant_filter_.max_ptr_, max_ptr_size * sizeof(float), IoDirection::DtoH);
+        // std::cout << "quant max = " << std::endl;
+        // for (size_t x=0; x < max_ptr_size; x++) {
+        //   std::cout << x << " " << max_vec[x] << std::endl;
+        // }
+
+        // std::cout << "weights:" << std::endl;
+        // weights
+        // std::vector<int16_t> weights_vec(filter_num * win_h * win_w * img_c);
+        // TargetWrapperXPU::MemcpySync(
+        //     weights_vec.data(), xpu_quant_filter_.data_ptr_, filter_num * win_h * win_w * img_c * sizeof(int16_t), IoDirection::DtoH);
+        // for (size_t x=0; x < filter_num * win_h * win_w * img_c; x += 1000) {
+        //   std::cout << x << " " << weights_vec[x] << std::endl;
+        //   if (x > 900) {
+        //     break;
+        //   }
+        // }
+        // if (mode_idx == 0x2b || mode_idx == 0x6f) {
+        //   std::ofstream ofsw("weight" + std::to_string(mode_idx));
+        //   for (size_t x=0; x < filter_num * win_h * win_w * img_c; x++) {
+        //     ofsw << weights_vec[x] << std::endl;
+        //   }
+        //   ofsw.close();
+        // }
+
+    }
+
+    //  64, 120, 120, 128, {1, 1},
+    if (img_c == 64 && filter_num == 64 && win_h== 1 && win_w == 1) {
+        size_t input_copy_size = param.input->data_size();
+        std::vector<float> input_copy_cpu(input_copy_size);
+        TargetWrapperXPU::MemcpySync(
+          input_copy_cpu.data(), param.input->template data<float>(), input_copy_size * sizeof(float), IoDirection::DtoH);
+  
+        const int32_t *ptr = reinterpret_cast<const int32_t*>(input_copy_cpu.data());
+        
+        std::cout << "zconv1 ";
+        for (size_t x=0; x < input_copy_size; x += 1000) {
+          // std::cout << x << " 0x" << std::hex << ptr[x] << std::endl;
+          std::cout << input_copy_cpu[x] << " " << std::hex << ptr[x] << " ";
+          if (x > 9000) { 
+            break;
+          }
+        }
+        std::cout << std::endl;
+    }
+    **************/
     DY* output = param.output->template mutable_data<DY>(TARGET(kXPU));
     int r = xdnn::conv2d_fusion<DX, TW, DY, TGEMM>(
         ctx.GetRawContext(),
@@ -153,6 +244,51 @@ void XPUConv2dCompute<TGEMM, TW, DX, DY, PType>::Run() {
         branch,
         act);
     CHECK_EQ(r, 0);
+    /********
+    if(img_c == 3 ) {
+    
+        std::cout << "output:" << std::endl;
+        size_t output_copy_size = param.output->data_size();
+        std::vector<float> output_copy_cpu(output_copy_size);
+        TargetWrapperXPU::MemcpySync(
+          output_copy_cpu.data(), output, output_copy_size * sizeof(float), IoDirection::DtoH);
+
+        // for (size_t x=0; x < output_copy_size; x += 1000) {
+        //   std::cout << x << " " << output_copy_cpu[x] << std::endl;
+        //   if (x > 9000) {
+        //     break;
+        //   }
+        // }
+
+        // if (mode_idx == 0x2b || mode_idx == 0x6f) {
+        //   std::ofstream ofs("output" + std::to_string(mode_idx));
+        //   for (size_t x=0; x < output_copy_size; x++) {
+        //     // std::cout << x << " " << input_copy_cpu[x] << std::endl;
+        //     ofs << output_copy_cpu[x] << std::endl;
+        //   }
+        //   ofs.close();
+        // }
+        mode_idx++;
+
+    }
+
+    if (img_c == 64 && filter_num == 64 && win_h== 1 && win_w == 1) {
+        size_t output_copy_size = param.output->data_size();
+        std::vector<float> output_copy_cpu(output_copy_size);
+        TargetWrapperXPU::MemcpySync(
+          output_copy_cpu.data(), output, output_copy_size * sizeof(float), IoDirection::DtoH);
+
+        std::cout << "zconv1 output ";
+        for (size_t x=0; x < output_copy_size; x += 1000) {
+          // std::cout << x << " 0x" << std::hex << ptr[x] << std::endl;
+          std::cout << output_copy_cpu[x] << " ";
+          if (x > 9000) { 
+            break;
+          }
+        }
+        std::cout << std::endl;
+    }
+    *********/
   }
 }
 

@@ -56,7 +56,10 @@ void XPUStaticKernelPickPass::Apply(const std::unique_ptr<SSAGraph>& graph) {
       if (xpu_inplace_op_.count(node->AsStmt().op_type())) {
         continue;
       }
-
+      if ( node->AsStmt().op_type() == "while") {
+        continue;
+      }
+      // std::cout << "node = " << node->AsStmt().op_type() << std::endl; 
       NodeInputPrecision(node, graph);
     }
 
@@ -354,6 +357,10 @@ void XPUStaticKernelPickPass::NodeOutputPrecision(
               << "in current scope.";
       continue;
     }
+    if (!var_ptr->IsType<lite::Tensor>()) {
+      VLOG(6) << "ignore variable's type is not tesor, var_name:  " << var_name;
+      continue;
+    }
 
     PrecisionType precison = var_ptr->GetMutable<lite::Tensor>()->precision();
     xpu_output_type_.emplace(var_name, precison);
@@ -477,6 +484,10 @@ void XPUStaticKernelPickPass::NodeInputPrecision(
     if (var_ptr == nullptr) {
       VLOG(6) << "Can't find input var_name:  " << var_name
               << "in current scope.";
+      continue;
+    }
+    if (!var_ptr->IsType<lite::Tensor>()) {
+      VLOG(6) << "Variable's type is not a tesor, var_name:  " << var_name;
       continue;
     }
 

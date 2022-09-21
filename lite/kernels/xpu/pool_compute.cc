@@ -84,6 +84,23 @@ void Pool2DCompute<InType, PType>::Run() {
     }
   } else {
     if (param.pooling_type == "avg") {
+      // // gtest_avg_pool2d<float>(api::kXPU2, "GM", "GM", 1, 128, 120, 120, {2, 2}, {2, 2}, {0, 1, 0, 1}, false, true, "NULL", "NULL");
+      // if (x_dims[1] == 64 && ksize[0] == 2 && ksize[1] == 2 && param.strides[0] == 2 && param.strides[1] == 2) { 
+
+      //   size_t input_copy_size = param.x->data_size();
+      //   std::vector<float> input_copy_cpu(input_copy_size);
+      //   TargetWrapperXPU::MemcpySync(
+      //     input_copy_cpu.data(), param.x->template data<float>(), input_copy_size * sizeof(float), IoDirection::DtoH);
+
+      //   std::cout << "zavg input ";
+      //   for (size_t x=0; x < input_copy_size; x += 1000) {
+      //     std::cout << input_copy_cpu[x] << " ";
+      //     if (x > 9000) {
+      //       break;
+      //     }
+      //   }
+      //   std::cout << std::endl;
+      // }
       int r = xdnn::avg_pool2d<InType>(
           ctx.GetRawContext(),
           param.x->template data<InType>(),
@@ -98,8 +115,33 @@ void Pool2DCompute<InType, PType>::Run() {
           !param.exclusive,
           true);
       CHECK_EQ(r, 0);
+      // if (x_dims[1] == 64 && ksize[0] == 2 && ksize[1] == 2 && param.strides[0] == 2 && param.strides[1] == 2) { 
+      //   size_t output_copy_size = param.output->data_size();
+      //   std::vector<float> output_copy_cpu(output_copy_size);
+      //   TargetWrapperXPU::MemcpySync(
+      //     output_copy_cpu.data(), param.output->template mutable_data<float>(), output_copy_size * sizeof(float), IoDirection::DtoH);
+
+      //   std::cout << "zavg output ";
+      //   for (size_t x=0; x < output_copy_size; x += 1000) {
+      //     std::cout << output_copy_cpu[x] << " ";
+      //     if (x > 9000) {
+      //       break;
+      //     }
+      //   }
+      //   std::cout << std::endl;
+      // }
     } else {
       if (param.pad_zero == true) {
+
+        // std::cout << "max_pool with nopad -----" << std::endl;
+        // size_t input_copy_size = param.x->data_size();
+        // std::vector<float> input_copy_cpu(input_copy_size);
+        // TargetWrapperXPU::MemcpySync(
+        //   input_copy_cpu.data(), param.x->template data<float>(), input_copy_size * sizeof(float), IoDirection::DtoH);
+  
+        // for (size_t x=0; x < input_copy_size; x += 300) {
+        //   std::cout << x << " " << input_copy_cpu[x] << std::endl;
+        // }
         int r = xdnn::max_pool2d<InType>(
             ctx.GetRawContext(),
             param.x->template data<InType>(),
@@ -114,6 +156,15 @@ void Pool2DCompute<InType, PType>::Run() {
             paddings,
             true);
         CHECK_EQ(r, 0);
+        // std::cout << "output =======" << std::endl;
+        // size_t output_copy_size = param.output->data_size();
+        // std::vector<float> output_copy_cpu(output_copy_size);
+        // TargetWrapperXPU::MemcpySync(
+        //   output_copy_cpu.data(), param.output->template mutable_data<float>(), output_copy_size * sizeof(float), IoDirection::DtoH);
+
+        // for (size_t x=0; x < output_copy_size; x += 300) {
+        //   std::cout << x << " " << output_copy_cpu[x] << std::endl;
+        // }
       } else {
         const InType* xpu_x_padded = nullptr;
         std::vector<int> xpu_x_padded_dims{static_cast<int>(x_dims[0]),
