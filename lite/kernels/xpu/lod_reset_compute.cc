@@ -26,10 +26,10 @@ void LodResetCompute::Run() {
   auto& ctx = this->ctx_->template As<XPUContext>();
   auto x = param.X;
   auto output = param.Out;
-
+  output->mutable_data(TARGET(kXPU), x->memory_size());
   int r = xdnn::copy<int8_t>(ctx.GetRawContext(),
                               x->template data<int8_t>(),
-                              output->template mutable_data<int8_t>(TARGET(kXPU)),
+                              reinterpret_cast<int8_t*>(output->raw_data()),
                               x->memory_size());
   CHECK_EQ(r, 0);
   // set lod

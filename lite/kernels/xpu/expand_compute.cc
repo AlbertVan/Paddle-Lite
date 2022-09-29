@@ -1,3 +1,11 @@
+/*
+ * @Author: AlbertVan ncepuzf11@163.com
+ * @Date: 2022-08-30 18:37:23
+ * @LastEditors: AlbertVan ncepuzf11@163.com
+ * @LastEditTime: 2022-09-24 08:40:51
+ * @FilePath: /icode-paddle-lite/Paddle-Lite/lite/kernels/xpu/expand_compute.cc
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 // Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

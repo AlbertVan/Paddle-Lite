@@ -46,7 +46,7 @@ void XPUFcCompute<TGEMM, TW, DX, DY, PType>::PrepareForRun() {
         TargetWrapperXPU::ConvertCPUWeightToXPUQuantWeight<int8_t, int8_t>(
             reinterpret_cast<const int8_t*>(w_ptr),
             weight_dims,
-            w_trans,
+            !w_trans,
             per_channel_ ? param.weight_max.size() : max_ptr_size);
     CHECK(xpu_quant_weight_.max_ptr_ != nullptr)
         << "slim int8 quant xpu_quant_weight_max_ptr should't be null";
@@ -74,7 +74,7 @@ void XPUFcCompute<TGEMM, TW, DX, DY, PType>::PrepareForRun() {
   } else {
     xpu_quant_weight_ =
         TargetWrapperXPU::ConvertCPUWeightToXPUQuantWeight<float, TW>(
-            w_ptr, weight_dims, w_trans, max_ptr_size);
+            w_ptr, weight_dims, !w_trans, max_ptr_size);
     if (std::is_same<TW, float>::value) {
       VLOG(6)
           << "If fc compute precision is int31,must check weight max should "
@@ -107,7 +107,7 @@ void XPUFcCompute<TGEMM, TW, DX, DY, PType>::Run() {
 
   bool x_trans = param.transpose_x;
   bool w_trans = param.transpose_w;
-  if (!w_trans) {
+  if (w_trans) {
     n = param.w->dims()[0];
   }
   int ldx = (x_trans ? m : k);

@@ -40,8 +40,6 @@ class XPUQkvAttentionCompute : public KernelLite<TARGET(kXPU), PRECISION(kFloat)
     virtual ~XPUQkvAttentionCompute() = default;
 
  private:
-   XPUScratchPadGuard qk_guard_;
-   XPUScratchPadGuard mask_guard_;
     // float w_max;
     // XPUScratchPadGuard q_max_guard_;
     // XPUScratchPadGuard k_max_guard_;
