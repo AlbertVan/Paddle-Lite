@@ -1,4 +1,4 @@
-// Copyright (c) 2020 PaddlePaddle Authors. All Rights Reserved.
+// Copyright (c) 2019 PaddlePaddle Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,32 +13,31 @@
 // limitations under the License.
 
 #pragma once
-
-#include "lite/core/kernel.h"
+#include <string>
+#include "lite/core/op_lite.h"
 
 namespace paddle {
 namespace lite {
-namespace kernels {
-namespace xpu {
+namespace operators {
 
-template <typename T, PrecisionType PType>
-class XPUSqueezeExcitationCompute
-    : public KernelLite<TARGET(kXPU), PType> {
+class XPUQkvAttentionOp : public OpLite {
  public:
-  using param_t = operators::XPUBlockFuseParam;
+  XPUQkvAttentionOp() {}
+  explicit XPUQkvAttentionOp(const std::string &op_type) : OpLite(op_type) {}
 
-  virtual void Run();
+  bool CheckShape() const override;
 
-  void PrepareForRun() override;
+  bool InferShapeImpl() const override;
 
-  virtual ~XPUSqueezeExcitationCompute() = default;
+  bool AttachImpl(const cpp::OpDesc &opdesc, lite::Scope *scope) override;
+
+  void AttachKernel(KernelBase *kernel) override { kernel->SetParam(param_); }
+  std::string DebugString() const override { return "QkvAttention"; }
 
  private:
-  XPUQuantData quant_weight1_;
-  XPUQuantData quant_weight2_;
+  mutable XPUQkvAttentionParam param_;
 };
 
-}  // namespace xpu
-}  // namespace kernels
+}  // namespace operators
 }  // namespace lite
 }  // namespace paddle
