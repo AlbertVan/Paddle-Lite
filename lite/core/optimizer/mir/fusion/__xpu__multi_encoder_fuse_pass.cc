@@ -2230,42 +2230,42 @@ class XPUMultiEncoderFusePass : public ProgramPass {
     VLOG(3) << "adaptive_seqlen: " << adaptive_seqlen;
 #endif
 
-    for (auto& act_type : act_types) {
-      for (auto& input_pos : input_poss) {
-        for (auto& qkv_ln_2_out_pos : qkv_ln_2_out_poss) {
-          for (auto& matmul_type : matmul_types) {
-            for (auto& matmul2_type : matmul2_types) {
-              for (auto& mul_type : mul_types) {
-                for (auto with_q_scale : with_q_scales) {
-                  for (auto norm_before : norm_befores) {
-                    for (auto relative_type : relative_embedding_type) {
-                      for (auto mask : with_mask) {
-                        fusion::XPUSingleEncoderFuser single_encoder_fuser(
-                            act_type,
-                            input_pos,
-                            qkv_ln_2_out_pos,
-                            matmul_type,
-                            matmul2_type,
-                            mul_type,
-                            with_q_scale,
-                            norm_before,
-                            relative_type,
-                            mask);
-                        single_encoder_fuser(graph.get());
-                        fusion::XPUMultiEncoderFuser multi_encoder_fuser(
-                            fc_precision, adaptive_seqlen);
-                        multi_encoder_fuser(graph.get());
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    for (auto& act_type : {"gelu", "__xpu__quick_gelu"}) {
+    // for (auto& act_type : act_types) {
+    //   for (auto& input_pos : input_poss) {
+    //     for (auto& qkv_ln_2_out_pos : qkv_ln_2_out_poss) {
+    //       for (auto& matmul_type : matmul_types) {
+    //         for (auto& matmul2_type : matmul2_types) {
+    //           for (auto& mul_type : mul_types) {
+    //             for (auto with_q_scale : with_q_scales) {
+    //               for (auto norm_before : norm_befores) {
+    //                 for (auto relative_type : relative_embedding_type) {
+    //                   for (auto mask : with_mask) {
+    //                     fusion::XPUSingleEncoderFuser single_encoder_fuser(
+    //                         act_type,
+    //                         input_pos,
+    //                         qkv_ln_2_out_pos,
+    //                         matmul_type,
+    //                         matmul2_type,
+    //                         mul_type,
+    //                         with_q_scale,
+    //                         norm_before,
+    //                         relative_type,
+    //                         mask);
+    //                     single_encoder_fuser(graph.get());
+    //                     fusion::XPUMultiEncoderFuser multi_encoder_fuser(
+    //                         fc_precision, adaptive_seqlen);
+    //                     multi_encoder_fuser(graph.get());
+    //                   }
+    //                 }
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+    for (auto& act_type : {"gelu"}) {
       for (auto& input_pos : {"X"}) {
         for (auto& qkv_ln_2_out_pos : {"X"}) {
           for (auto& matmul_type : matmul_types) {

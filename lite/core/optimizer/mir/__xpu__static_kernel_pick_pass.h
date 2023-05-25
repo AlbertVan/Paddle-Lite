@@ -237,7 +237,7 @@ class XPUStaticKernelPickPass : public mir::StmtPass {
         score = 0;
       }
 
-      if (instruct.op_info()->Type() == "multiclass_nms3") {
+      if (instruct.op_info()->Type() == "multiclass_nms3" || instruct.op_info()->Type() == "multiclass_nms") {
         kernel_use_host_ = true;
       }
 
